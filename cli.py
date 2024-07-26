@@ -1,5 +1,5 @@
-from typing import Optional, Literal
-from tap import Tap
+from typing import Optional, Literal, Dict, Any
+from tap import Tap, tapify
 
 
 class MyTap(Tap):
@@ -8,6 +8,18 @@ class MyTap(Tap):
     optional_field: Optional[str] = None
     choice: Literal["Option1", "Option2", "Option3"] = "Option1"
     agree: bool = False
+
+
+def tap_func(
+    name: str,
+    age: int,
+    optional_field: Optional[str] = None,
+    choice: Literal["Option1", "Option2", "Option3"] = "Option1",
+    agree: bool = False,
+) -> Dict[str, Any]:
+    return dict(
+        name=name, age=age, optional_field=optional_field, choice=choice, agree=agree, is_tap_func=True
+    )
 
 
 if __name__ == "__main__":
@@ -36,6 +48,8 @@ if __name__ == "__main__":
     )
 
     print(my_tap._annotations)
+
+    print(result := tapify(tap_func))
 
     import ipdb
 

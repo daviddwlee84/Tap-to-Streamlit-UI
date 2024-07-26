@@ -7,6 +7,7 @@ from typing import (
     Dict,
     Type,
     Tuple,
+    get_type_hints,
 )
 import streamlit as st
 from pydantic import create_model, BaseModel
@@ -14,6 +15,7 @@ from tap import Tap
 from wtforms import StringField, IntegerField, BooleanField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Optional
 from flask_wtf import FlaskForm
+import inspect
 
 
 def _get_streamlit_input(
@@ -96,12 +98,25 @@ def create_streamlit_ui(
 
 def create_pydantic_model(tap_class: Tap) -> Type[BaseModel]:
     fields = {}
-    for name, (arg_type, default, _) in _parse_tap(tap_class).items():
-        fields[name] = (arg_type, default)
+    for name, (arg_type, default, is_required) in _parse_tap(tap_class).items():
+        fields[name] = (arg_type, ... if is_required else default)
 
     # Dynamically create Pydantic model
     pydantic_model = create_model(tap_class.__name__ + "Model", **fields)
     return pydantic_model
+
+
+def create_pydantic_model_from_func(func: callable) -> Type[BaseModel]:
+    type_hints = get_type_hints(func)
+    fields = {}
+    for param_name, param_type in type_hints.items():
+        if param_name != "return":
+            default = inspect.signature(func).parameters[param_name].default
+            if default is inspect.Parameter.empty:
+                fields[param_name] = (param_type, ...)
+            else:
+                fields[param_name] = (param_type, default)
+    return create_model("DynamicModel", **fields)
 
 
 def _get_flask_input(
@@ -151,15 +166,16 @@ def create_flask_form_class(tap_class: Tap) -> Type[FlaskForm]:
 
 
 if __name__ == "__main__":
-    from cli import MyTap
+    from cli import MyTap, tap_func
 
     print(parsed_dict := _parse_tap(MyTap))
 
-    # class MyTapModel(MyTap, BaseModel):
-    #     pass
-
+    # NOTE: must set required arguments otherwise will throw error pydantic_core._pydantic_core.ValidationError
     print(pydantic_model1 := create_pydantic_model(MyTap))
-    print(pydantic_model1().model_dump_json())
+    print(pydantic_model1(name="David", age=87).model_dump_json())
+
+    print(pydantic_model2 := create_pydantic_model_from_func(tap_func))
+    print(pydantic_model2(name="David", age=87).model_dump_json())
 
     import ipdb
 

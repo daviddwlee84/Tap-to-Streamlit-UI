@@ -1,8 +1,8 @@
 from typing import Optional, Union
 from fastapi import FastAPI, Query, Form, Depends
 from pydantic import BaseModel
-from cli import MyTap
-from utils import create_pydantic_model
+from cli import MyTap, tap_func
+from utils import create_pydantic_model, create_pydantic_model_from_func
 
 MyTapModel = create_pydantic_model(MyTap)
 
@@ -30,7 +30,7 @@ async def submit_post(model: MyTapModel):  # type: ignore
 
 
 @app.get("/submit", response_model=MyTapModel)
-async def submit_get(model: BaseModel = Depends(get_model_from_query)):
+async def submit_get(model: dict = Depends(get_model_from_query)):
     return model
 
 
@@ -46,3 +46,21 @@ async def submit_form(
         name=name, age=age, optional_field=optional_field, choice=choice, agree=agree
     )
     return model
+
+
+MyTapFuncModel = create_pydantic_model_from_func(tap_func)
+
+
+# Trick to get Pydantic schema for depends for get request
+def _get_tap_model_params(model: BaseModel = Depends(MyTapFuncModel)) -> dict:
+    return model.model_dump()
+
+
+@app.post("/test-tap-func")
+async def submit_func_post(model: MyTapFuncModel):  # type: ignore
+    return tap_func(**model.model_dump())
+
+
+@app.get("/test-tap-func")
+async def submit_func_get(model: dict = Depends(_get_tap_model_params)):  # type: ignore
+    return tap_func(**model)
