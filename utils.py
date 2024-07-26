@@ -11,6 +11,9 @@ from typing import (
 import streamlit as st
 from pydantic import create_model, BaseModel
 from tap import Tap
+from wtforms import StringField, IntegerField, BooleanField, SelectField, SubmitField
+from wtforms.validators import DataRequired, Optional
+from flask_wtf import FlaskForm
 
 
 def _get_streamlit_input(
@@ -99,6 +102,52 @@ def create_pydantic_model(tap_class: Tap) -> Type[BaseModel]:
     # Dynamically create Pydantic model
     pydantic_model = create_model(tap_class.__name__ + "Model", **fields)
     return pydantic_model
+
+
+def _get_flask_input(
+    name: str, arg_type: Type, default: Any, is_required: bool = False
+):
+    validators = [DataRequired() if is_required else Optional()]
+
+    # Handle Literal types (which are Enums or fixed choices)
+    if get_origin(arg_type) is Literal:
+        choices = [(choice, choice) for choice in get_args(arg_type)]
+        return SelectField(
+            name, choices=choices, default=default, validators=validators
+        )
+
+    # Handle Optional types
+    elif get_origin(arg_type) is Union and type(None) in get_args(arg_type):
+        inner_type = [t for t in get_args(arg_type) if t is not type(None)][0]
+        return _get_flask_input(name, inner_type, default, is_required)
+
+    # Handle simple types
+    if arg_type is str:
+        return StringField(name, default=default, validators=validators)
+    elif arg_type is bool:
+        return BooleanField(name, default=default, validators=validators)
+    elif arg_type is int:
+        return IntegerField(name, default=default, validators=validators)
+    elif arg_type is float:
+        return IntegerField(name, default=default, validators=validators)
+
+    return None
+
+
+def create_flask_form_class(tap_class: Tap) -> Type[FlaskForm]:
+    form_fields = {}
+
+    for name, (arg_type, default, is_required) in _parse_tap(tap_class).items():
+        form_field = _get_flask_input(name, arg_type, default, is_required)
+        if form_field:
+            form_fields[name] = form_field
+
+    # Add submit buttons
+    form_fields["submit_json"] = SubmitField("Send POST JSON")
+    form_fields["submit_get"] = SubmitField("Send GET Request")
+    form_fields["submit_form"] = SubmitField("Send POST Form")
+
+    return type("DynamicForm", (FlaskForm,), form_fields)
 
 
 if __name__ == "__main__":
