@@ -25,6 +25,7 @@ def get_model_from_query(
 @app.post("/submit", response_model=MyTapModel)
 # NOTE: we need to pass the exact Pydantic data model. And we try to ignore warning "Variable not allowed in type expressionPylancereportInvalidTypeForm"
 async def submit_post(model: MyTapModel):  # type: ignore
+    # BUG: it won't fill "default value" automatically like the other two
     return model
 
 

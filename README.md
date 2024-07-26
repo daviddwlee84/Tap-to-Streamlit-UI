@@ -26,7 +26,13 @@ Web UI
 
 ```bash
 # Streamlit
-streamlit run ui.py
+streamlit run ui_streamlit.py
 # Flask
-flask --app ui2 --debug run --port 8889
+flask --app ui_flask --debug run --port 8889
+```
+
+Terminal UI
+
+```bash
+python tui.py
 ```

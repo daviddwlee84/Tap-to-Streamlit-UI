@@ -5,3 +5,4 @@ fastapi
 requests
 Flask
 Flask-WTF
+textual
