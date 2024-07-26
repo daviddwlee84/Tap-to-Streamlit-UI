@@ -14,14 +14,14 @@ CLI
 python cli.py --name "David" --age 87python cli.py
 ```
 
-Web UI (Streamlit)
-
-```bash
-streamlit run ui.py
-```
-
 API
 
 ```bash
 fastapi dev .\api.py --port 8888
+```
+
+Web UI (Streamlit)
+
+```bash
+streamlit run ui.py
 ```
