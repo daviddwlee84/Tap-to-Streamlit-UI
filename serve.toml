@@ -1,0 +1,2 @@
+[app.Converter]
+command = "python tui.py"

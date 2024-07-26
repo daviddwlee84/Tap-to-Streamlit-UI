@@ -27,8 +27,13 @@ Web UI
 ```bash
 # Streamlit
 streamlit run ui_streamlit.py
+
 # Flask
 flask --app ui_flask --debug run --port 8889
+
+# Textual Web (super slow, not recommend)
+pipx install textual-web
+textual-web --config serve.toml
 ```
 
 Terminal UI
