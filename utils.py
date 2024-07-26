@@ -91,7 +91,7 @@ def create_streamlit_ui(
     return inputs, empty_args
 
 
-def create_pydantic_model(tap_class: Tap) -> BaseModel:
+def create_pydantic_model(tap_class: Tap) -> Type[BaseModel]:
     fields = {}
     for name, (arg_type, default, _) in _parse_tap(tap_class).items():
         fields[name] = (arg_type, default)
@@ -104,5 +104,14 @@ def create_pydantic_model(tap_class: Tap) -> BaseModel:
 if __name__ == "__main__":
     from cli import MyTap
 
-    my_tap = MyTap()
-    print(parsed_dict := _parse_tap(my_tap))
+    print(parsed_dict := _parse_tap(MyTap))
+
+    # class MyTapModel(MyTap, BaseModel):
+    #     pass
+
+    print(pydantic_model1 := create_pydantic_model(MyTap))
+    print(pydantic_model1().model_dump_json())
+
+    import ipdb
+
+    ipdb.set_trace()

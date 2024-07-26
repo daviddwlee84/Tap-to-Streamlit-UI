@@ -1,3 +1,4 @@
 typed-argument-parser
 streamlit
 pydantic
+fastapi
