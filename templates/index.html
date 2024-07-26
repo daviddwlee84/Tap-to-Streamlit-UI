@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>FastAPI Request Tester</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5">FastAPI Request Tester</h1>
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.name.label(class="form-control-label") }}
+                {{ form.name(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.age.label(class="form-control-label") }}
+                {{ form.age(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.optional_field.label(class="form-control-label") }}
+                {{ form.optional_field(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.choice.label(class="form-control-label") }}
+                {{ form.choice(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.agree.label(class="form-control-label") }}
+                {{ form.agree(class="form-check-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit_json(class="btn btn-primary") }}
+                {{ form.submit_get(class="btn btn-secondary") }}
+                {{ form.submit_form(class="btn btn-success") }}
+            </div>
+        </form>
+        {% if response_data %}
+        <div class="mt-5">
+            <h3>Response Data</h3>
+            <pre>{{ response_data|tojson }}</pre>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>
