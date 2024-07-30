@@ -1,4 +1,4 @@
-from typing import Optional, Literal, Dict, Any
+from typing import Optional, Literal, Dict, Any, List, Set, Tuple
 from tap import Tap, tapify
 
 
@@ -8,6 +8,16 @@ class MyTap(Tap):
     optional_field: Optional[str] = None
     choice: Literal["Option1", "Option2", "Option3"] = "Option1"
     agree: bool = False
+    multiselect_list: List[Literal["Choice 1", "Choice 2", "Choice 3"]] = []
+    default_multiselect_list: List[
+        Literal["Selection 1", "Selection 2", "Selection 3"]
+    ] = ["Selection 1", "Selection 3"]
+    default_empty_list: List[int] = []
+    default_empty_set: Set[str] = set()
+    default_empty_tuple: Tuple[float, float] = tuple()
+    optional_list: Optional[List[str]] = None
+    optional_set: Optional[Set[int]] = None
+    optional_tuple: Optional[Tuple[int, ...]] = None
 
 
 def tap_func(
@@ -16,9 +26,16 @@ def tap_func(
     optional_field: Optional[str] = None,
     choice: Literal["Option1", "Option2", "Option3"] = "Option1",
     agree: bool = False,
+    items: List[str] = [],
 ) -> Dict[str, Any]:
     return dict(
-        name=name, age=age, optional_field=optional_field, choice=choice, agree=agree, is_tap_func=True
+        name=name,
+        age=age,
+        optional_field=optional_field,
+        choice=choice,
+        agree=agree,
+        items=items,
+        is_tap_func=True,
     )
 
 

@@ -42,6 +42,56 @@ def _get_streamlit_input(
         value = _get_streamlit_input(name, inner_type, default, is_required)
         return value if value != "" else None
 
+    # Handle List, Set, and Tuple types
+    elif get_origin(arg_type) in {list, set}:
+        inner_type = get_args(arg_type)[0]
+        choices = default if default else []
+        if inner_type is str:
+            return st.text_area(
+                name,
+                value="\n".join(choices),
+                help=(
+                    "Required. (Per item per line.)"
+                    if is_required
+                    else "(Per item per line.)"
+                ),
+            ).split("\n")
+        elif inner_type in {int, float}:
+            return st.text_area(
+                name,
+                value="\n".join(map(str, choices)),
+                help=(
+                    "Required. (Per item per line.)"
+                    if is_required
+                    else "(Per item per line.)"
+                ),
+            ).split("\n")
+        elif get_origin(inner_type) is Literal:
+            choices = get_args(inner_type)
+            return st.multiselect(name, choices, default=default)
+        else:
+            st.warning(f"Unknown inner_type of {name} {arg_type}")
+
+    elif get_origin(arg_type) is tuple:
+        inner_types = get_args(arg_type)
+        if len(inner_types) == 2 and inner_types[1] is ...:
+            return st.text_area(
+                name,
+                value=", ".join(map(str, default if default else [])),
+                help=(
+                    "Required. (Items should be separated by `, `.)"
+                    if is_required
+                    else "(Items should be separated by `, `.)"
+                ),
+            ).split(", ")
+        else:
+            return tuple(
+                _get_streamlit_input(
+                    f"{name}[{i}]", t, default[i] if default else None, is_required
+                )
+                for i, t in enumerate(inner_types)
+            )
+
     # Handle simple types
     if arg_type is str:
         return st.text_input(
@@ -74,6 +124,7 @@ def _parse_tap_class(tap_class: Type[Tap]) -> Dict[str, Tuple[Type, Any]]:
         results[name] = (arg_type, default, is_required)
     return results
 
+
 def _parse_tap_obj(tap_obj: Tap) -> Dict[str, Tuple[Type, Any]]:
     results = {}
     default_value_dict = tap_obj._get_class_dict()
@@ -89,6 +140,7 @@ def _parse_tap_obj(tap_obj: Tap) -> Dict[str, Tuple[Type, Any]]:
         results[name] = (arg_type, default, is_required)
     return results
 
+
 def _parse_tap(tap_class_or_obj: Union[Type[Tap], Tap]) -> Dict[str, Tuple[Type, Any]]:
     if isinstance(tap_class_or_obj, type(Tap)):
         return _parse_tap_class(tap_class_or_obj)
@@ -96,6 +148,7 @@ def _parse_tap(tap_class_or_obj: Union[Type[Tap], Tap]) -> Dict[str, Tuple[Type,
         return _parse_tap_obj
     else:
         raise NotImplementedError(f"Unknown type {type(tap_class_or_obj)}.")
+
 
 def _streamlit_is_empty(arg_type: Type, value: Any) -> bool:
     if arg_type is str:
@@ -201,7 +254,11 @@ if __name__ == "__main__":
     print(pydantic_model2(name="David", age=87).model_dump_json())
 
     print(parsed_obj_dict := _parse_tap_obj(obj := MyTap()))
-    print(parsed_obj_dict_init := _parse_tap_obj(obj := MyTap().parse_args(["--name", "David", "--age", "87"])))
+    print(
+        parsed_obj_dict_init := _parse_tap_obj(
+            obj := MyTap().parse_args(["--name", "David", "--age", "87"])
+        )
+    )
 
     import ipdb
 
