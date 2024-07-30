@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import Optional, Annotated, Literal, Tuple, List
 from fastapi import FastAPI, Query, Form, Depends
 from pydantic import BaseModel
 from cli import MyTap, tap_func
@@ -27,11 +27,37 @@ def get_model_from_query(
     name: str = Query(),
     age: int = Query(),
     optional_field: Optional[str] = Query(None),
-    choice: Optional[str] = Query("Option1"),
+    choice: Literal["Option1", "Option2", "Option3"] = Query("Option1"),
     agree: Optional[bool] = Query(False),
+    coordinates: Optional[str] = Query("0.0,0.0"),
+    optional_list: Optional[str] = Query(None),
+    multiselect_list: Optional[str] = Query(
+        None,
+        # examples=["Choice 1", "Choice 2", "Choice 3"],
+        description='["Choice 1", "Choice 2", "Choice 3"]',
+    ),
+    default_multiselect_list: Optional[str] = Query(
+        "Selection 1,Selection 2",
+        # examples=["Selection 1", "Selection 2", "Selection 3"],
+        description='["Selection 1", "Selection 2", "Selection 3"]',
+    ),
 ):
     return MyTapModel(
-        name=name, age=age, optional_field=optional_field, choice=choice, agree=agree
+        name=name,
+        age=age,
+        optional_field=optional_field,
+        choice=choice,
+        agree=agree,
+        coordinates=(
+            tuple(float(x) for x in coordinates.split(","))
+            if coordinates
+            else (0.0, 0.0)
+        ),
+        optional_list=optional_list.split(",") if optional_list else [],
+        multiselect_list=multiselect_list.split(",") if multiselect_list else [],
+        default_multiselect_list=(
+            default_multiselect_list.split(",") if default_multiselect_list else []
+        ),
     )
 
 
@@ -55,11 +81,32 @@ async def submit_form(
     name: str = Form(),
     age: int = Form(),
     optional_field: Optional[str] = Form(None),
-    choice: Optional[str] = Form("Option1"),
+    choice: Literal["Option1", "Option2", "Option3"] = Form("Option1"),
     agree: Optional[bool] = Form(False),
+    # BUG: not converting string to float
+    # coordinates: Tuple[float, float] = Form((0.0, 0.0)),
+    optional_list: List[str] = Form([]),
+    # BUG: cannot multi-select
+    multiselect_list: List[Literal["Choice 1", "Choice 2", "Choice 3"]] = Form(
+        [],
+    ),
+    # BUG: UI not showing default value correctly
+    # default_multiselect_list: Optional[
+    #     List[Literal["Selection 1", "Selection 2", "Selection 3"]]
+    # ] = Form(["Selection 1", "Selection 2"]),
 ):
+    # https://github.com/fastapi/fastapi/issues/562
+    # https://github.com/pydantic/pydantic/issues/1350
     model = MyTapModel(
-        name=name, age=age, optional_field=optional_field, choice=choice, agree=agree
+        name=name,
+        age=age,
+        optional_field=optional_field,
+        choice=choice,
+        agree=agree,
+        # coordinates=[float(item) for item in coordinates],
+        optional_list=optional_list,
+        multiselect_list=multiselect_list,
+        # default_multiselect_list=default_multiselect_list,
     )
     return model
 

@@ -14,7 +14,7 @@ class MyTap(Tap):
     ] = ["Selection 1", "Selection 3"]
     default_empty_list: List[int] = []
     default_empty_set: Set[str] = set()
-    default_empty_tuple: Tuple[float, float] = tuple()
+    coordinates: Tuple[float, float] = (0.0, 0.0)
     optional_list: Optional[List[str]] = None
     optional_set: Optional[Set[int]] = None
     optional_tuple: Optional[Tuple[int, ...]] = None
