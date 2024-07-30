@@ -63,7 +63,8 @@ def _get_streamlit_input(
     return None
 
 
-def _parse_tap(tap_class: Tap) -> Dict[str, Tuple[Type, Any]]:
+# NOTE: actually they can be combine into single try except..., but let's leave it as what it is...
+def _parse_tap_class(tap_class: Type[Tap]) -> Dict[str, Tuple[Type, Any]]:
     results = {}
     obj: Tap = tap_class()
     default_value_dict = obj._get_class_dict()
@@ -73,6 +74,28 @@ def _parse_tap(tap_class: Tap) -> Dict[str, Tuple[Type, Any]]:
         results[name] = (arg_type, default, is_required)
     return results
 
+def _parse_tap_obj(tap_obj: Tap) -> Dict[str, Tuple[Type, Any]]:
+    results = {}
+    default_value_dict = tap_obj._get_class_dict()
+    for name, arg_type in tap_obj._annotations.items():
+        try:
+            # Already parse_args
+            default = getattr(tap_obj, name)
+            is_required = False
+        except AttributeError:
+            # Fallback to raw one
+            default = default_value_dict.get(name)
+            is_required = name not in default_value_dict
+        results[name] = (arg_type, default, is_required)
+    return results
+
+def _parse_tap(tap_class_or_obj: Union[Type[Tap], Tap]) -> Dict[str, Tuple[Type, Any]]:
+    if isinstance(tap_class_or_obj, type(Tap)):
+        return _parse_tap_class(tap_class_or_obj)
+    elif isinstance(tap_class_or_obj, Tap):
+        return _parse_tap_obj
+    else:
+        raise NotImplementedError(f"Unknown type {type(tap_class_or_obj)}.")
 
 def _streamlit_is_empty(arg_type: Type, value: Any) -> bool:
     if arg_type is str:
@@ -176,6 +199,9 @@ if __name__ == "__main__":
 
     print(pydantic_model2 := create_pydantic_model_from_func(tap_func))
     print(pydantic_model2(name="David", age=87).model_dump_json())
+
+    print(parsed_obj_dict := _parse_tap_obj(obj := MyTap()))
+    print(parsed_obj_dict_init := _parse_tap_obj(obj := MyTap().parse_args(["--name", "David", "--age", "87"])))
 
     import ipdb
 
