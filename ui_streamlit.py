@@ -16,6 +16,9 @@ st.divider()
 # Create the Streamlit UI based on the Tap class
 inputs, empty_args = create_streamlit_ui(MyTap, required_warning=not allow_empty)
 
+with st.expander("Load Streamlit inputs back to Tap object"):
+    st.write(MyTap().from_dict(inputs))
+
 local_tap, api_tab = st.tabs(["Local", "API"])
 
 

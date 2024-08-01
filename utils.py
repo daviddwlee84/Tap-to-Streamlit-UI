@@ -115,9 +115,8 @@ def _get_streamlit_input(
             else:
                 step = 10**-decimal_places_length
                 # format_str = f"%0.{decimal_places_length}f"
-                # TODO: scientific notation seems doesn't work in Streamlit
                 # https://stackoverflow.com/questions/6913532/display-a-decimal-in-scientific-notation
-                format_str = f"%0.{decimal_places_length}E"
+                format_str = f"%0.E"
         else:
             step = None
             format_str = None
