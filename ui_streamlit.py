@@ -10,11 +10,18 @@ st.set_page_config("Streamlit Tap Converter")
 st.title("Streamlit Tap Converter")
 
 allow_empty = st.checkbox("Allow Empty")
+use_default = st.checkbox("Use Default Value")
 
 st.divider()
 
-# Create the Streamlit UI based on the Tap class
-inputs, empty_args = create_streamlit_ui(MyTap, required_warning=not allow_empty)
+if not use_default:
+    # Create the Streamlit UI based on the Tap class
+    inputs, empty_args = create_streamlit_ui(MyTap, required_warning=not allow_empty)
+else:
+    inputs, empty_args = create_streamlit_ui(
+        MyTap().parse_args(["--name", "David", "--age", "87"]),
+        required_warning=not allow_empty,
+    )
 
 with st.expander("Load Streamlit inputs back to Tap object"):
     st.write(MyTap().from_dict(inputs))

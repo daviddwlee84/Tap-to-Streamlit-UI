@@ -169,7 +169,7 @@ def _parse_tap(tap_class_or_obj: Union[Type[Tap], Tap]) -> Dict[str, Tuple[Type,
     if isinstance(tap_class_or_obj, type(Tap)):
         return _parse_tap_class(tap_class_or_obj)
     elif isinstance(tap_class_or_obj, Tap):
-        return _parse_tap_obj
+        return _parse_tap_obj(tap_class_or_obj)
     else:
         raise NotImplementedError(f"Unknown type {type(tap_class_or_obj)}.")
 
