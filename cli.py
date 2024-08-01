@@ -6,6 +6,7 @@ class MyTap(Tap):
     name: str
     age: int
     lr: float = 0.000001
+    date_str: str = "2024-08-01"
     optional_field: Optional[str] = None
     choice: Literal["Option1", "Option2", "Option3"] = "Option1"
     agree: bool = False
@@ -25,6 +26,7 @@ def tap_func(
     name: str,
     age: int,
     lr: float = 0.000001,
+    date_str: str = "2024-08-01",
     optional_field: Optional[str] = None,
     choice: Literal["Option1", "Option2", "Option3"] = "Option1",
     agree: bool = False,
@@ -33,6 +35,8 @@ def tap_func(
     return dict(
         name=name,
         age=age,
+        lr=lr,
+        date_str=date_str,
         optional_field=optional_field,
         choice=choice,
         agree=agree,

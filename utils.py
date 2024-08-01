@@ -16,6 +16,7 @@ from wtforms import StringField, IntegerField, BooleanField, SelectField, Submit
 from wtforms.validators import DataRequired, Optional
 from flask_wtf import FlaskForm
 import inspect
+import datetime
 
 
 def _get_streamlit_input(
@@ -94,9 +95,14 @@ def _get_streamlit_input(
 
     # Handle simple types
     if arg_type is str:
-        return st.text_input(
-            name, value=default, help="Required" if is_required else None
-        )
+        try:
+            # Try to see if a string is a "isoformat date"
+            date = datetime.date.fromisoformat(default)
+            return st.date_input(name, value=date, help="Required" if is_required else None).isoformat()
+        except:
+            return st.text_input(
+                name, value=default, help="Required" if is_required else None
+            )
     elif arg_type is bool:
         return st.checkbox(
             name, value=default, help="Required" if is_required else None
