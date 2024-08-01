@@ -106,8 +106,27 @@ def _get_streamlit_input(
             name, value=default, step=1, help="Required" if is_required else None
         )
     elif arg_type is float:
+        if default:
+            default = float(default)
+            decimal_places_length = len("{:f}".format(default).split(".", 1)[1])
+            if decimal_places_length <= 2:
+                step = 0.01
+                format_str = "%0.2f"
+            else:
+                step = 10**-decimal_places_length
+                # format_str = f"%0.{decimal_places_length}f"
+                # TODO: scientific notation seems doesn't work in Streamlit
+                # https://stackoverflow.com/questions/6913532/display-a-decimal-in-scientific-notation
+                format_str = f"%0.{decimal_places_length}E"
+        else:
+            step = None
+            format_str = None
         return st.number_input(
-            name, value=default, help="Required" if is_required else None
+            name,
+            value=default,
+            step=step,
+            format=format_str,
+            help="Required" if is_required else None,
         )
 
     return None

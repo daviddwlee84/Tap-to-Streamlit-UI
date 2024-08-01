@@ -5,6 +5,7 @@ from tap import Tap, tapify
 class MyTap(Tap):
     name: str
     age: int
+    lr: float = 0.000001
     optional_field: Optional[str] = None
     choice: Literal["Option1", "Option2", "Option3"] = "Option1"
     agree: bool = False
@@ -23,6 +24,7 @@ class MyTap(Tap):
 def tap_func(
     name: str,
     age: int,
+    lr: float = 0.000001,
     optional_field: Optional[str] = None,
     choice: Literal["Option1", "Option2", "Option3"] = "Option1",
     agree: bool = False,
