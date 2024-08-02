@@ -13,7 +13,7 @@ pip install -r requirements.txt
 CLI
 
 ```bash
-python cli.py --name "David" --age 87python cli.py
+python cli.py --name "David" --age 87
 ```
 
 API
@@ -41,3 +41,7 @@ Terminal UI
 ```bash
 python tui.py
 ```
+
+## Todo
+
+- [ ] Make this a [Streamlit Component](https://docs.streamlit.io/develop/concepts/custom-components/create)

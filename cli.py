@@ -7,6 +7,8 @@ class MyTap(Tap):
     age: int
     lr: float = 0.000001
     date_str: str = "2024-08-01"
+    boolean_flag: bool = True
+    boolean_flag_with_input: Literal[True, False] = True
     optional_field: Optional[str] = None
     choice: Literal["Option1", "Option2", "Option3"] = "Option1"
     agree: bool = False
