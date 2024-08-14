@@ -48,7 +48,7 @@ def _get_streamlit_input(
         inner_type = get_args(arg_type)[0]
         choices = default if default else []
         if inner_type is str:
-            return st.text_area(
+            text_area_result = st.text_area(
                 name,
                 value="\n".join(choices),
                 help=(
@@ -56,9 +56,11 @@ def _get_streamlit_input(
                     if is_required
                     else "(Per item per line.)"
                 ),
-            ).split("\n")
+            )
+            # NOTE: "".split("\n") is ['']
+            return default if not text_area_result else text_area_result.split("\n")
         elif inner_type in {int, float}:
-            return st.text_area(
+            text_area_result = st.text_area(
                 name,
                 value="\n".join(map(str, choices)),
                 help=(
@@ -66,7 +68,8 @@ def _get_streamlit_input(
                     if is_required
                     else "(Per item per line.)"
                 ),
-            ).split("\n")
+            )
+            return default if not text_area_result else text_area_result.split("\n")
         elif get_origin(inner_type) is Literal:
             choices = get_args(inner_type)
             return st.multiselect(name, choices, default=default)
